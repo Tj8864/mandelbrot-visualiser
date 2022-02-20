@@ -9,6 +9,8 @@ const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
 const int max_iterations = 255;
 
+int iters[SCREEN_WIDTH][SCREEN_HEIGHT];
+
 SDL_Window* gWindow = nullptr;
 SDL_Surface* gScreenSurface = nullptr;
 SDL_Surface* gImage = nullptr;
@@ -33,8 +35,9 @@ int updateMandelbrot(int start_x, int end_x)
             int _iters = count_iterations(x,y,tl,br);
             // std::cout << _iters << " iterations\n";
             Uint8 color = (Uint8)_iters;
-            SDL_SetRenderDrawColor(gRenderer, uint8_t(3*color+4), uint8_t(5*color+6), color/2, 255);
-            SDL_RenderDrawPoint(gRenderer, x, y);
+            // SDL_SetRenderDrawColor(gRenderer, uint8_t(3*color+4), uint8_t(5*color+6), color/2, 255);
+            // SDL_RenderDrawPoint(gRenderer, x, y);
+            iters[x][y] = _iters;
         }
     }
     return 0;
@@ -105,7 +108,21 @@ int main(int argc, char *argv[])
                 if(moved) {
                     auto start_time = std::chrono::high_resolution_clock::now();
                     SDL_RenderClear(gRenderer);
-                    updateMandelbrot(0, SCREEN_WIDTH);
+                    std::thread threads[16];
+                    int threadWidth = SCREEN_WIDTH/16;
+                    for(int i = 0; i < 16; i++) {
+                        threads[i] = std::thread(updateMandelbrot, i*threadWidth, (i+1)*threadWidth);
+                    }
+                    for(int i = 0; i < 16; i++) {
+                        threads[i].join();
+                    }
+                    for(int x = 0; x < SCREEN_WIDTH; x++) {
+                        for(int y = 0; y < SCREEN_HEIGHT; y++) {
+                            Uint8 color = (Uint8)iters[x][y];
+                            SDL_SetRenderDrawColor(gRenderer, uint8_t(3*color+4), uint8_t(5*color+6), color/2, 255);
+                            SDL_RenderDrawPoint(gRenderer, x, y);
+                        }
+                    }
                     SDL_RenderPresent(gRenderer);
                     auto end_time = std::chrono::high_resolution_clock::now();
                     std::cout << "Time elapsed: " << std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count() << "ms\n";
