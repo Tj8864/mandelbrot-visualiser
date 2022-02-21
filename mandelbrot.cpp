@@ -17,7 +17,7 @@ int count_iterations(int pixel_x, int pixel_y, coordinate top_left, coordinate b
     
     for(int _ = 0; _ < max_iterations; _++) {
         z = z*z + c;
-        if(z.real()*z.real() + z.imag()*z.imag() > 2) {
+        if(z.real()*z.real() + z.imag()*z.imag() > 4) {
             return _;
         }
     }

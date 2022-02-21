@@ -33,10 +33,7 @@ int updateMandelbrot(int start_x, int end_x)
     for(int x = start_x; x < end_x; x++) {
         for(int y = 0; y < SCREEN_HEIGHT; y++) {
             int _iters = count_iterations(x,y,tl,br);
-            // std::cout << _iters << " iterations\n";
             Uint8 color = (Uint8)_iters;
-            // SDL_SetRenderDrawColor(gRenderer, uint8_t(3*color+4), uint8_t(5*color+6), color/2, 255);
-            // SDL_RenderDrawPoint(gRenderer, x, y);
             iters[x][y] = _iters;
         }
     }
@@ -125,7 +122,9 @@ int main(int argc, char *argv[])
                     }
                     SDL_RenderPresent(gRenderer);
                     auto end_time = std::chrono::high_resolution_clock::now();
+                    #ifdef _DEBUG
                     std::cout << "Time elapsed: " << std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count() << "ms\n";
+                    #endif
                 }
             }
         }
