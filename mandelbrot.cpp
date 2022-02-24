@@ -2,7 +2,7 @@
 #include"coordinate.h"
 #include<immintrin.h>
 
-extern const int max_iterations;
+extern int max_iterations;
 extern const int SCREEN_WIDTH;
 extern const int SCREEN_HEIGHT;
 extern int iters[640][480];

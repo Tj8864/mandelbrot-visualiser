@@ -7,7 +7,7 @@
 
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
-const int max_iterations = 255;
+int max_iterations = 256;
 
 int iters[SCREEN_WIDTH][SCREEN_HEIGHT];
 
@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
             }
             if(e.type == SDL_KEYDOWN) {
                 bool moved = false;
-                if(e.key.keysym.sym == SDLK_x) {
+                if(e.key.keysym.sym == SDLK_o) {
                     coordinate mid = {(tl.x + br.x)/2, (tl.y + br.y)/2};
                     differenceX *= 1.1, differenceY *= 1.1;
                     tl.x = mid.x - differenceX/2;
@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
                     br.y = mid.y + differenceY/2;
                     moved = true;
                 }
-                else if(e.key.keysym.sym == SDLK_z) {
+                else if(e.key.keysym.sym == SDLK_i) {
                     coordinate mid = {(tl.x + br.x)/2, (tl.y + br.y)/2};
                     differenceX /= 1.1, differenceY /= 1.1;
                     tl.x = mid.x - differenceX/2;
@@ -93,6 +93,12 @@ int main(int argc, char *argv[])
                     tl.x += (double)differenceX/40;
                     br.x += (double)differenceX/40;   
                     moved = true;   
+                } else if(e.key.keysym.sym == SDLK_m) {
+                    max_iterations += 64;
+                    moved = true;
+                } else if(e.key.keysym.sym == SDLK_l) {
+                    max_iterations -= 64;
+                    moved = true;
                 }
 
                 if(moved) {
@@ -108,7 +114,8 @@ int main(int argc, char *argv[])
                     }
                     for(int x = 0; x < SCREEN_WIDTH; x++) {
                         for(int y = 0; y < SCREEN_HEIGHT; y++) {
-                            Uint8 color = (Uint8)iters[x][y];
+                            float color = iters[x][y];
+                            color /= (max_iterations/255.0);
                             SDL_SetRenderDrawColor(gRenderer, uint8_t(3*color+4), uint8_t(5*color+6), color/2, 255);
                             SDL_RenderDrawPoint(gRenderer, x, y);
                         }
