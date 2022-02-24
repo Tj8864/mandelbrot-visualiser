@@ -74,12 +74,12 @@ int main(int argc, char *argv[])
                     br.y = mid.y + differenceY/2;
                     moved = true;
                 }
-                else if(e.key.keysym.sym == SDLK_UP) {
+                else if(e.key.keysym.sym == SDLK_DOWN) {
                     tl.y += (double)differenceY/40;
                     br.y += (double)differenceY/40;   
                     moved = true;
                 }
-                else if(e.key.keysym.sym == SDLK_DOWN) {
+                else if(e.key.keysym.sym == SDLK_UP) {
                     tl.y -= (double)differenceY/40;
                     br.y -= (double)differenceY/40;  
                     moved = true;
