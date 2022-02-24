@@ -23,22 +23,15 @@ bool __close();
 /*
     Command to run:
 
-    g++ -Isrc/include -Lsrc/lib -o main main.cpp -lmingw32 -lSDL2main -lSDL2 -pthread
+    g++ -Isrc/include -Lsrc/lib -o main main.cpp -lmingw32 -lSDL2main -lSDL2 -pthread -mavx512f
+
+    With frame times - 
+    
+    g++ -Isrc/include -Lsrc/lib -o main main.cpp -lmingw32 -lSDL2main -lSDL2 -pthread -mavx512f -D_DEBUG
 */
 
 coordinate tl = {-2,-1.5}, br = {2,1.5};
 
-int updateMandelbrot(int start_x, int end_x)
-{
-    for(int x = start_x; x < end_x; x++) {
-        for(int y = 0; y < SCREEN_HEIGHT; y++) {
-            int _iters = count_iterations(x,y,tl,br);
-            Uint8 color = (Uint8)_iters;
-            iters[x][y] = _iters;
-        }
-    }
-    return 0;
-}
 
 int main(int argc, char *argv[])
 {
@@ -52,7 +45,7 @@ int main(int argc, char *argv[])
     double differenceX = 4, differenceY = 3;
 
     SDL_RenderClear(gRenderer);
-    updateMandelbrot(0, SCREEN_WIDTH);
+    updateMandelbrot(0, SCREEN_WIDTH,tl,br);
     SDL_RenderPresent(gRenderer);
     bool running = true;
     SDL_Event e;
@@ -108,7 +101,7 @@ int main(int argc, char *argv[])
                     std::thread threads[16];
                     int threadWidth = SCREEN_WIDTH/16;
                     for(int i = 0; i < 16; i++) {
-                        threads[i] = std::thread(updateMandelbrot, i*threadWidth, (i+1)*threadWidth);
+                        threads[i] = std::thread(updateMandelbrot, i*threadWidth, (i+1)*threadWidth, tl, br);
                     }
                     for(int i = 0; i < 16; i++) {
                         threads[i].join();
