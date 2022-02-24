@@ -11,5 +11,7 @@ For displaying frame times include -D_DEBUG
 
 ### Usage instructions - 
 Use up/down/left/right arrow keys for panning
+
 Use i to zoom in and o to zoom out
+
 Use l for less iterations(less detail) and m for more iterations(more detail)
