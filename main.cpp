@@ -116,7 +116,12 @@ int main(int argc, char *argv[])
                         for(int y = 0; y < SCREEN_HEIGHT; y++) {
                             float color = iters[x][y];
                             color /= (max_iterations/255.0);
-                            SDL_SetRenderDrawColor(gRenderer, uint8_t(3*color+4), uint8_t(5*color+6), color/2, 255);
+                            float r = (3*color+4);
+                            r -= floor(r/255)*255;
+                            float g = (5*color+6);
+                            g -= floor(g/255)*255;
+                            float b = color/2;
+                            SDL_SetRenderDrawColor(gRenderer, r, g, b, 255);
                             SDL_RenderDrawPoint(gRenderer, x, y);
                         }
                     }
