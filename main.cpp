@@ -1,25 +1,3 @@
-#include<SDL2/SDL.h>
-#include<iostream>
-#include"mandelbrot.cpp"
-#include"coordinate.h"
-#include<thread>
-#include<chrono>
-
-const int SCREEN_WIDTH = 640;
-const int SCREEN_HEIGHT = 480;
-int max_iterations = 256;
-
-int iters[SCREEN_WIDTH][SCREEN_HEIGHT];
-
-SDL_Window* gWindow = nullptr;
-SDL_Surface* gScreenSurface = nullptr;
-SDL_Surface* gImage = nullptr;
-SDL_Renderer* gRenderer = nullptr;
-
-bool __init();
-bool __loadMedia(const char * file);
-bool __close();
-
 /*
     Command to run:
 
@@ -30,8 +8,29 @@ bool __close();
     g++ -Isrc/include -Lsrc/lib -o main main.cpp -lmingw32 -lSDL2main -lSDL2 -pthread -mavx512f -D_DEBUG
 */
 
+
+#include<SDL2/SDL.h>
+#include<iostream>
+#include"mandelbrot.cpp"
+#include"coordinate.h"
+#include<thread>
+#include<chrono>
+#include"sdl_ops.cpp"
+
+
+const int SCREEN_WIDTH = 640;
+const int SCREEN_HEIGHT = 480;
+int max_iterations = 256;
+int iters[SCREEN_WIDTH][SCREEN_HEIGHT];
 coordinate tl = {-2,-1.5}, br = {2,1.5};
 
+SDL_Window* gWindow = nullptr;
+SDL_Surface* gScreenSurface = nullptr;
+SDL_Surface* gImage = nullptr;
+SDL_Renderer* gRenderer = nullptr;
+
+
+void prepare_image();
 
 int main(int argc, char *argv[])
 {
@@ -46,9 +45,12 @@ int main(int argc, char *argv[])
 
     SDL_RenderClear(gRenderer);
     updateMandelbrot(0, SCREEN_WIDTH,tl,br);
+    prepare_image();
     SDL_RenderPresent(gRenderer);
+
     bool running = true;
     SDL_Event e;
+
     while(running) {
         while(SDL_PollEvent(&e) != 0) {
             if(e.type == SDL_QUIT) {
@@ -101,6 +103,8 @@ int main(int argc, char *argv[])
                     moved = true;
                 }
 
+
+
                 if(moved) {
                     auto start_time = std::chrono::high_resolution_clock::now();
                     SDL_RenderClear(gRenderer);
@@ -112,19 +116,7 @@ int main(int argc, char *argv[])
                     for(int i = 0; i < 16; i++) {
                         threads[i].join();
                     }
-                    for(int x = 0; x < SCREEN_WIDTH; x++) {
-                        for(int y = 0; y < SCREEN_HEIGHT; y++) {
-                            float color = iters[x][y];
-                            color /= (max_iterations/255.0);
-                            float r = (3*color+4);
-                            r -= floor(r/255)*255;
-                            float g = (5*color+6);
-                            g -= floor(g/255)*255;
-                            float b = color/2;
-                            SDL_SetRenderDrawColor(gRenderer, r, g, b, 255);
-                            SDL_RenderDrawPoint(gRenderer, x, y);
-                        }
-                    }
+                    prepare_image();
                     SDL_RenderPresent(gRenderer);
                     auto end_time = std::chrono::high_resolution_clock::now();
                     #ifdef _DEBUG
@@ -140,46 +132,20 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-bool __init()
+void prepare_image()
 {
-    if(SDL_Init(SDL_INIT_VIDEO) < 0){
-        std::cerr << "SDL Init failed, aborting!\n";
-        return 0;
+    for(int x = 0; x < SCREEN_WIDTH; x++) {
+        for(int y = 0; y < SCREEN_HEIGHT; y++) {
+            float color = iters[x][y];
+            color /= (max_iterations/255.0);
+            float r = (3*color+4);
+            r -= floor(r/255)*255;
+            float g = (5*color+6);
+            g -= floor(g/255)*255;
+            float b = color/2;
+            SDL_SetRenderDrawColor(gRenderer, r, g, b, 255);
+            SDL_RenderDrawPoint(gRenderer, x, y);
+        }
     }
-    gWindow = SDL_CreateWindow("Mandelbrot set visualiser", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
-    if(gWindow == nullptr){
-        std::cerr << "SDL Window creation failed, aborting!\n";
-        return 0;
-    }
-    gScreenSurface = SDL_GetWindowSurface(gWindow);
-    gRenderer = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_ACCELERATED);
-    if(gRenderer == nullptr){
-        std::cerr << "SDL Renderer creation failed, aborting!\n";
-        return 0;
-    }
-    SDL_SetRenderDrawColor(gRenderer, 0x0, 0xFF, 0xFF, 0xFF);
-
-    return true;
-}
-
-bool __loadMedia(const char * file) {
-    gImage = SDL_LoadBMP(file);
-    if(gImage == nullptr) {
-        std::cerr << "Failed to load image, aborting!\n";
-        return 0;
-    }
-    SDL_BlitSurface(gImage, nullptr, gScreenSurface, nullptr);
-    SDL_UpdateWindowSurface(gWindow);
-    return true;
-}
-
-bool __close() {
-    std::cout << "Close called\n";
-    SDL_FreeSurface(gImage);
-    gImage = nullptr;
-    SDL_DestroyWindow(gWindow);
-    gWindow = nullptr;
-    SDL_Quit();
-    return true;
 }
 
